@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>¡Esperando el 2026!</title>
     <style>
         body {
@@ -11,69 +11,82 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #3B7382;
+            min-height: 100vh; /* Usa min-height para evitar cortes en móviles */
+            background-color: #4548a9;
             color: black;
-            font-family: 'Apple Chancery', cursive, sans-serif;
+            font-family: 'Apple Chancery', 'Comic Sans MS', cursive, sans-serif;
             text-align: center;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
-        /* Estilo del Contador Inicial */
-        #countdown-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            animation: fadeIn 2s ease-in;
+        /* Contenedor responsivo */
+        #countdown-screen, #message-screen {
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
+        #message-screen {
+            display: none;
+            border: 2px solid black;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            animation: popIn 1.5s ease-out;
+        }
+
+        /* Ajuste del tamaño de fuente para móviles */
+        h1 { 
+            font-size: 1.8rem; 
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        /* Cuadrícula del contador flexible */
         .timer-grid {
-            display: flex;
-            gap: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 columnas en móvil */
+            gap: 10px;
             margin-top: 20px;
+        }
+
+        /* Si la pantalla es más grande, 4 columnas */
+        @media (min-width: 400px) {
+            .timer-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
 
         .unit {
             background: rgba(255, 255, 255, 0.2);
-            padding: 15px;
-            border-radius: 15px;
-            min-width: 80px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .unit span {
             display: block;
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: bold;
         }
 
-        /* Estilo del Contenedor del Mensaje (Oculto al inicio) */
-        #message-screen {
-            display: none;
-            border: 2px solid black;
-            padding: 40px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            max-width: 80%;
-            animation: popIn 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        p { 
+            font-size: 1.2rem; 
+            line-height: 1.4;
+            margin: 15px 0;
         }
 
-        h1 { font-size: 3rem; margin-bottom: 10px; }
-        p { font-size: 1.5rem; line-height: 1.6; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes popIn { 
-            0% { transform: scale(0.5); opacity: 0; } 
+            0% { transform: scale(0.8); opacity: 0; } 
             100% { transform: scale(1); opacity: 1; } 
         }
 
-        /* Confeti simple */
         .confetti {
             position: absolute;
-            width: 10px;
-            height: 10px;
-            background: gold;
+            width: 8px;
+            height: 8px;
+            z-index: -1;
             animation: fall 3s linear infinite;
         }
         @keyframes fall {
@@ -96,21 +109,21 @@
     <div id="message-screen">
         <h1>¡Feliz Año Nuevo! 🎆</h1>
         <p>Te deseo un 2026 lleno de salud, éxito y mucha felicidad.</p>
-        <p>¡Que se cumplan todas tus metas y te ocurran muchas cosas bonitas! Enfócate en ti y en tu armonía. ✨✨✨</p>
-        <p><strong>✨ ¡A celebrar! ✨</strong></p>
+        <p>¡Que se cumplan todas tus metas y te ocurran muchas cosas bonitas! Enfócate en ti y en tu armonía. ✨</p>
+        <p><strong>¡A celebrar! ✨</strong></p>
     </div>
 
     <script>
-        // Fecha objetivo
         const target = new Date("Jan 1, 2026 00:00:00").getTime();
 
         function createConfetti() {
-            for(let i=0; i<50; i++) {
+            for(let i=0; i<40; i++) {
                 const c = document.createElement('div');
                 c.className = 'confetti';
                 c.style.left = Math.random() * 100 + 'vw';
-                c.style.delay = Math.random() * 2 + 's';
-                c.style.backgroundColor = ['#1D7CAD', '#C7D422', '#733D80', '#22D4C8'][Math.floor(Math.random()*3)];
+                c.style.top = '-10px';
+                c.style.animationDelay = Math.random() * 3 + 's';
+                c.style.backgroundColor = ['#ffd700', '#ffffff', '#ff69b4', '#00ff00'][Math.floor(Math.random()*4)];
                 document.body.appendChild(c);
             }
         }
@@ -123,7 +136,7 @@
                 clearInterval(timer);
                 document.getElementById('countdown-screen').style.display = 'none';
                 document.getElementById('message-screen').style.display = 'block';
-                document.body.style.backgroundColor = '#3B7382'; // Cambia un poco el color al final
+                document.body.style.backgroundColor = '#5c5fcf';
                 createConfetti();
                 return;
             }
