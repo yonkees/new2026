@@ -1,151 +1,483 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>¡Esperando el 2026!</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh; /* Usa min-height para evitar cortes en móviles */
-            background-color: #4548a9;
-            color: black;
-            font-family: 'Apple Chancery', 'Comic Sans MS', cursive, sans-serif;
-            text-align: center;
-            overflow-x: hidden;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>¡Esperando el 2026!</title>
 
-        /* Contenedor responsivo */
-        #countdown-screen, #message-screen {
-            width: 90%;
-            max-width: 500px;
-            padding: 20px;
-            box-sizing: border-box;
-        }
+  <style>
+    :root{
+      --bg1:#0a0f2e;
+      --bg2:#1b1f6a;
+      --glass: rgba(255,255,255,.10);
+      --glass2: rgba(255,255,255,.16);
+      --stroke: rgba(255,255,255,.22);
+      --txt: rgba(255,255,255,.95);
+      --muted: rgba(255,255,255,.75);
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+      --radius: 22px;
+    }
 
-        #message-screen {
-            display: none;
-            border: 2px solid black;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            animation: popIn 1.5s ease-out;
-        }
+    *{ box-sizing:border-box; }
+    html, body { height:100%; }
 
-        /* Ajuste del tamaño de fuente para móviles */
-        h1 { 
-            font-size: 1.8rem; 
-            margin-bottom: 20px;
-            line-height: 1.2;
-        }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      color:var(--txt);
+      font-family: ui-rounded, system-ui, -apple-system, "SF Pro Display", "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 800px at 20% 10%, rgba(120,130,255,.35), transparent 60%),
+        radial-gradient(900px 700px at 90% 20%, rgba(255,120,180,.18), transparent 55%),
+        radial-gradient(900px 700px at 30% 90%, rgba(120,255,220,.12), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
 
-        /* Cuadrícula del contador flexible */
-        .timer-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 columnas en móvil */
-            gap: 10px;
-            margin-top: 20px;
-        }
+    /* Canvas full-screen para fuegos artificiales */
+    #fx{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+    }
 
-        /* Si la pantalla es más grande, 4 columnas */
-        @media (min-width: 400px) {
-            .timer-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
+    /* Estrellas suaves */
+    .stars{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      opacity:.45;
+      background-image:
+        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,.9), transparent 60%),
+        radial-gradient(1px 1px at 80px 120px, rgba(255,255,255,.8), transparent 60%),
+        radial-gradient(1.5px 1.5px at 160px 60px, rgba(255,255,255,.7), transparent 60%),
+        radial-gradient(1px 1px at 240px 140px, rgba(255,255,255,.6), transparent 60%),
+        radial-gradient(2px 2px at 320px 90px, rgba(255,255,255,.7), transparent 60%),
+        radial-gradient(1px 1px at 420px 40px, rgba(255,255,255,.6), transparent 60%),
+        radial-gradient(1.5px 1.5px at 520px 160px, rgba(255,255,255,.65), transparent 60%);
+      background-size: 600px 200px;
+      animation: drift 18s linear infinite;
+      filter: blur(.2px);
+    }
+    @keyframes drift{
+      from{ transform: translateY(0); }
+      to{ transform: translateY(80px); }
+    }
 
-        .unit {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 10px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+    .wrap{
+      position:relative;
+      z-index:1;
+      width:min(560px, 92vw);
+      padding:22px;
+    }
 
-        .unit span {
-            display: block;
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
+    .card{
+      background: linear-gradient(180deg, var(--glass2), var(--glass));
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 24px 22px;
+      overflow:hidden;
+    }
 
-        p { 
-            font-size: 1.2rem; 
-            line-height: 1.4;
-            margin: 15px 0;
-        }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 12px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.20);
+      background: rgba(0,0,0,.12);
+      font-size:.92rem;
+      color: var(--muted);
+      margin-bottom:14px;
+    }
 
-        @keyframes popIn { 
-            0% { transform: scale(0.8); opacity: 0; } 
-            100% { transform: scale(1); opacity: 1; } 
-        }
+    h1{
+      margin:0 0 12px;
+      font-size: clamp(1.45rem, 3.7vw, 2rem);
+      line-height:1.15;
+      letter-spacing:.2px;
+    }
 
-        .confetti {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            z-index: -1;
-            animation: fall 3s linear infinite;
-        }
-        @keyframes fall {
-            to { transform: translateY(100vh) rotate(360deg); }
-        }
-    </style>
+    p{
+      margin:10px 0 0;
+      color: var(--muted);
+      font-size:1.05rem;
+      line-height:1.45;
+    }
+
+    /* Grid contador */
+    .grid{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:12px;
+    }
+    @media (min-width: 520px){
+      .grid{ grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .unit{
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      padding:14px 12px;
+      text-align:center;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .label{
+      margin-top:6px;
+      font-size:.92rem;
+      color: rgba(255,255,255,.72);
+      letter-spacing:.3px;
+    }
+
+    /* Número con “flip” sutil */
+    .num{
+      display:inline-block;
+      font-variant-numeric: tabular-nums;
+      font-weight: 800;
+      font-size: clamp(1.8rem, 5vw, 2.2rem);
+      letter-spacing: .6px;
+      transform-origin: 50% 60%;
+      transition: transform .35s ease, filter .35s ease;
+      text-shadow: 0 10px 26px rgba(0,0,0,.38);
+    }
+    .num.bump{
+      transform: translateY(-2px) rotateX(18deg);
+      filter: brightness(1.12);
+    }
+
+    /* Glow decorativo */
+    .unit::before{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.20), transparent 55%);
+      transform: rotate(12deg);
+      opacity:.75;
+    }
+
+    /* Pantallas */
+    #message-screen{ display:none; }
+
+    /* Confetti */
+    .confetti{
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      z-index: 2;
+      top: -10px;
+      border-radius: 2px;
+      animation: fall linear infinite;
+      pointer-events:none;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(720deg); }
+    }
+
+    /* Entrada suave */
+    .pop{
+      animation: popIn 900ms ease-out both;
+    }
+    @keyframes popIn{
+      from{ transform: translateY(10px) scale(.98); opacity:0; }
+      to{ transform: translateY(0) scale(1); opacity:1; }
+    }
+
+    /* Footer mini */
+    .mini{
+      text-align:center;
+      margin-top:12px;
+      font-size:.9rem;
+      color: rgba(255,255,255,.65);
+    }
+  </style>
 </head>
+
 <body>
+  <canvas id="fx"></canvas>
+  <div class="stars"></div>
 
-    <div id="countdown-screen">
-        <h1>Falta poco para la magia...</h1>
-        <div class="timer-grid">
-            <div class="unit"><span id="days">00</span>Días</div>
-            <div class="unit"><span id="hours">00</span>Hrs</div>
-            <div class="unit"><span id="minutes">00</span>Min</div>
-            <div class="unit"><span id="seconds">00</span>Seg</div>
+  <main class="wrap pop">
+    <section class="card" id="countdown-screen" aria-live="polite">
+      <div class="badge">⏳ Cuenta regresiva • 2026</div>
+      <h1>Falta poco para la magia…</h1>
+      <p>Prepárate: cuando llegue la hora, el cielo se va a encender 🎇</p>
+
+      <div class="grid">
+        <div class="unit">
+          <div class="num" id="days">00</div>
+          <div class="label">Días</div>
         </div>
-    </div>
+        <div class="unit">
+          <div class="num" id="hours">00</div>
+          <div class="label">Horas</div>
+        </div>
+        <div class="unit">
+          <div class="num" id="minutes">00</div>
+          <div class="label">Minutos</div>
+        </div>
+        <div class="unit">
+          <div class="num" id="seconds">00</div>
+          <div class="label">Segundos</div>
+        </div>
+      </div>
 
-    <div id="message-screen">
-        <h1>¡Feliz Año Nuevo! 🎆</h1>
-        <p>Te deseo un 2026 lleno de salud, éxito y mucha felicidad.</p>
-        <p>¡Que se cumplan todas tus metas y te ocurran muchas cosas bonitas! Enfócate en ti y en tu armonía. ✨</p>
-        <p><strong>¡A celebrar! ✨</strong></p>
-    </div>
+      <div class="mini">Tip: en móvil, gira a horizontal para ver más grande 😄</div>
+    </section>
 
-    <script>
-        const target = new Date("Jan 1, 2026 00:00:00").getTime();
+    <section class="card pop" id="message-screen">
+      <div class="badge">🎆 ¡Llegó el momento!</div>
+      <h1>¡Feliz Año Nuevo! ✨</h1>
+      <p>Deseo que este 2026 te regale paz interior, fuerza para seguir tus sueños y serenidad para soltar lo que ya no suma.</p>
+      <p>Que se cumplan tus metas y te pasen cosas bonitas. Enfócate en ti y en tu armonía 🌙</p>
+	<p>Que la prosperidad y la abundancia fluyan en tu vida, trayendo estabilidad y oportunidades para crecer.</p>
+	<p>Este año es tuyo: ¡hazlo extraordinario! 🌟</p>
+      <p style="margin-top:14px;"><strong>¡A celebrar! 🥂</strong></p>
+    </section>
+  </main>
 
-        function createConfetti() {
-            for(let i=0; i<40; i++) {
-                const c = document.createElement('div');
-                c.className = 'confetti';
-                c.style.left = Math.random() * 100 + 'vw';
-                c.style.top = '-10px';
-                c.style.animationDelay = Math.random() * 3 + 's';
-                c.style.backgroundColor = ['#ffd700', '#ffffff', '#ff69b4', '#00ff00'][Math.floor(Math.random()*4)];
-                document.body.appendChild(c);
-            }
+  <script>
+    // =========================
+    // CONFIG
+    // =========================
+    const target = new Date("Dec 31, 2025 23:13:00").getTime();
+
+    // =========================
+    // Helpers UI
+    // =========================
+    function pad2(n){ return String(n).padStart(2, "0"); }
+
+    function bump(el){
+      el.classList.remove("bump");
+      // fuerza reflow para que se vuelva a disparar la animación
+      void el.offsetWidth;
+      el.classList.add("bump");
+      setTimeout(()=> el.classList.remove("bump"), 350);
+    }
+
+    function setText(id, value){
+      const el = document.getElementById(id);
+      if(el.textContent !== value){
+        el.textContent = value;
+        bump(el);
+      }
+    }
+
+    // =========================
+    // Confetti
+    // =========================
+    function createConfettiBurst(amount = 90) {
+      const colors = ["#ffd700", "#ffffff", "#ff69b4", "#00ffd5", "#8a7dff"];
+      for (let i = 0; i < amount; i++) {
+        const c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random() * 100 + "vw";
+        c.style.animationDuration = (2.2 + Math.random() * 2.2) + "s";
+        c.style.animationDelay = (Math.random() * 0.6) + "s";
+        c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        c.style.opacity = (0.6 + Math.random() * 0.4).toFixed(2);
+        c.style.transform = `translateY(-10px) rotate(${Math.random()*180}deg)`;
+        document.body.appendChild(c);
+
+        setTimeout(() => c.remove(), 5200);
+      }
+    }
+
+    // =========================
+    // Fireworks (Canvas)
+    // =========================
+    const canvas = document.getElementById("fx");
+    const ctx = canvas.getContext("2d");
+
+    let W, H, DPR;
+    function resize(){
+      DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      W = canvas.width = Math.floor(window.innerWidth * DPR);
+      H = canvas.height = Math.floor(window.innerHeight * DPR);
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    const random = (min, max) => Math.random() * (max - min) + min;
+
+    class Particle{
+      constructor(x, y, vx, vy, hue){
+        this.x = x; this.y = y;
+        this.vx = vx; this.vy = vy;
+        this.alpha = 1;
+        this.decay = random(0.012, 0.020);
+        this.gravity = 0.035 * DPR;
+        this.hue = hue;
+        this.size = random(1.2, 2.2) * DPR;
+      }
+      update(){
+        this.vx *= 0.99;
+        this.vy *= 0.99;
+        this.vy += this.gravity;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= this.decay;
+      }
+      draw(){
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.alpha);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+        ctx.fillStyle = `hsl(${this.hue} 100% 65%)`;
+        ctx.fill();
+        ctx.restore();
+      }
+      get dead(){ return this.alpha <= 0; }
+    }
+
+    class Firework{
+      constructor(x, y){
+        this.x = x;
+        this.y = H;                 // inicia abajo
+        this.tx = x;                // target x
+        this.ty = y;                // target y
+        this.vx = random(-0.6, 0.6) * DPR;
+        this.vy = random(-10.5, -8.8) * DPR;
+        this.hue = Math.floor(random(0, 360));
+        this.exploded = false;
+      }
+      update(){
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.10 * DPR;      // gravedad
+        // cuando sube lo suficiente, explota
+        if(this.vy >= -1.2 * DPR || this.y <= this.ty){
+          this.exploded = true;
+          explode(this.x, this.y, this.hue);
         }
+      }
+      draw(){
+        ctx.save();
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 1.8 * DPR, 0, Math.PI*2);
+        ctx.fillStyle = `hsl(${this.hue} 100% 70%)`;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
 
-        const timer = setInterval(() => {
-            const now = new Date().getTime();
-            const diff = target - now;
+    const fireworks = [];
+    const particles = [];
 
-            if (diff <= 0) {
-                clearInterval(timer);
-                document.getElementById('countdown-screen').style.display = 'none';
-                document.getElementById('message-screen').style.display = 'block';
-                document.body.style.backgroundColor = '#5c5fcf';
-                createConfetti();
-                return;
-            }
+    function explode(x, y, hue){
+      const count = Math.floor(random(55, 95));
+      for(let i=0;i<count;i++){
+        const angle = (Math.PI * 2) * (i / count);
+        const speed = random(2.2, 5.3) * DPR;
+        const vx = Math.cos(angle) * speed * random(0.6, 1.2);
+        const vy = Math.sin(angle) * speed * random(0.6, 1.2);
+        particles.push(new Particle(x, y, vx, vy, hue + random(-18, 18)));
+      }
+    }
 
-            document.getElementById("days").innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
-            document.getElementById("hours").innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            document.getElementById("minutes").innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            document.getElementById("seconds").innerText = Math.floor((diff % (1000 * 60)) / 1000);
-        }, 1000);
-    </script>
+    let fireworksEnabled = false;
+    let lastLaunch = 0;
+
+    function launchRandom(){
+      const x = random(0.15, 0.85) * W;
+      const y = random(0.18, 0.45) * H;
+      fireworks.push(new Firework(x, y));
+    }
+
+    function animate(t){
+      // fondo con "trail" para efecto de estela
+      ctx.fillStyle = "rgba(0,0,0,0.16)";
+      ctx.fillRect(0, 0, W, H);
+
+      if(fireworksEnabled){
+        if(t - lastLaunch > random(220, 520)){
+          lastLaunch = t;
+          launchRandom();
+          if(Math.random() < 0.25) setTimeout(launchRandom, 120);
+        }
+      }
+
+      // update/draw fireworks
+      for(let i=fireworks.length-1;i>=0;i--){
+        const f = fireworks[i];
+        f.update();
+        f.draw();
+        if(f.exploded) fireworks.splice(i,1);
+      }
+
+      // update/draw particles
+      for(let i=particles.length-1;i>=0;i--){
+        const p = particles[i];
+        p.update();
+        p.draw();
+        if(p.dead) particles.splice(i,1);
+      }
+
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+
+    // Click para lanzar un fuego artificial (cuando ya estén activados)
+    window.addEventListener("pointerdown", (e) => {
+      if(!fireworksEnabled) return;
+      const x = e.clientX * DPR;
+      const y = e.clientY * DPR;
+      fireworks.push(new Firework(x, y));
+    });
+
+    // =========================
+    // Countdown
+    // =========================
+    const screenCountdown = document.getElementById("countdown-screen");
+    const screenMessage = document.getElementById("message-screen");
+
+    const timer = setInterval(() => {
+      const now = Date.now();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        clearInterval(timer);
+
+        // Cambia pantallas
+        screenCountdown.style.display = "none";
+        screenMessage.style.display = "block";
+
+        // Activa showtime 🎆
+        fireworksEnabled = true;
+        createConfettiBurst(140);
+
+        // Un mini show inicial
+        for(let i=0;i<5;i++){
+          setTimeout(launchRandom, i * 180);
+        }
+        return;
+      }
+
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setText("days", pad2(d));
+      setText("hours", pad2(h));
+      setText("minutes", pad2(m));
+      setText("seconds", pad2(s));
+    }, 1000);
+  </script>
 </body>
 </html>
